@@ -1,4 +1,3 @@
-from builtins import range
 import numpy as np
 
 
@@ -11,6 +10,7 @@ def affine_forward(x, w, b):
     then transform it to an output vector of dimension M.
 
     Inputs:
+
     - x: A numpy array containing input data, of shape (N, d_1, ..., d_k)
     - w: A numpy array of weights, of shape (D, M)
     - b: A numpy array of biases, of shape (M,)

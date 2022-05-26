@@ -1,5 +1,3 @@
-from builtins import range
-from builtins import object
 import numpy as np
 
 from ..layers import *
@@ -74,14 +72,17 @@ class FullyConnectedNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        self.layers = np.concatenate((input_dim, hidden_dims))
+        self.rng = np.random.default_rng(seed)
+        layers = [input_dim] + hidden_dims
 
-        for i in range(1, self.num_layers):
-            self.params[f"W{i}"] = np.random.normal(loc=0.0, scale=weight_scale, \
-                size=(self.layers[i-1], self.layers[i]))
-            self.params[f"b{i}"] = np.zeros(shape=(self.layers[i], 1))
-            self.params[f"gamma{i}"] = np.ones((self.layers[i], 1)) # for batch normalization
-            self.params[f"beta{i}"] = np.zeros((self.layers[i], 1)) # for batch normalization
+        for i in range(1, len(layers)):
+            self.params[f"W{i}"] = self.rng.normal(loc=0.0, scale=weight_scale, \
+                size=(layers[i-1], layers[i])).astype(self.dtype)
+            self.params[f"b{i}"] = np.zeros(shape=(layers[i], 1), dtype=self.dtype)
+
+            # for batch normalization
+            self.params[f"gamma{i}"] = np.ones((layers[i], 1), dtype=self.dtype)
+            self.params[f"beta{i}"] = np.zeros((layers[i], 1), dtype=self.dtype)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -155,18 +156,14 @@ class FullyConnectedNet(object):
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        z = {}
-        a = {}
-        cache = {}
+        z, a, cache = {}, {}, {}
+        a[0] = X
 
-        z[1], cache[1] = affine_forward(X, self.params["W1"], self.params["b1"])
-        a[1], _ = relu_forward(z[1])
-        for i in range(2, self.num_layers-1):
+        for i in range(1, self.num_layers+1):
             z[i], cache[i] = affine_forward(a[i-1], self.params[f"W{i}"], \
                 self.params[f"b{i}"])
             a[i], _ = relu_forward(z[i])
-        scores, cache[self.num_layers] = affine_forward(a[self.num_layers-1], \
-            self.params[f"W{self.num_layers}"], self.params[f"b{self.num_layers}"])
+        scores = z[self.num_layers]
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
